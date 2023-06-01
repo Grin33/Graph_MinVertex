@@ -76,21 +76,15 @@ namespace Matvey
             }
             ToRet[i].Connections = new List<int>();
 
-            //foreach (var conParent in ToRet[i].Connections)
-            //{
-            //    foreach(var p in ToRet)
-            //        if(p.Number == conParent)
-            //            foreach(var c in p.Connections)
-            //                if(c == ToRet[i].Number)
-            //                {
-            //                    ToRet[p.Number-1].Connections.Remove(c);
-            //                    break;
-            //                }
-            //}
             return ToRet;
         }
         static void Check(List<Point> tempoints,List<int> tempans)
         {
+            var blah = new List<int>() { 2, 4, 5, 6 };
+            if (tempans.Equals(blah))
+            {
+                var serdtfghjimk = 0;
+            }
             bool ch = true;
             foreach(var p in tempoints)
             {
@@ -101,7 +95,14 @@ namespace Matvey
             }
             if (ch)
             {
-                Ans = new List<int>(tempans);
+                if (Ans.Count > tempans.Count)
+                {
+                    Ans = new List<int>(tempans);
+                }
+                else if (Ans.Count == 0)
+                {
+                    Ans = new List<int>(tempans);
+                }
             }
         }
         static void ShuffleNested(List<Point> tempoints, int v, List<int> tempans)
@@ -110,13 +111,23 @@ namespace Matvey
             int n = v + 1;
             for(int i = n; i < tempoints.Count; i++)
             {
-                DeleteVertex(tempoints, i);
-                Console.WriteLine("Ответ по концу итерации с началом в " + v + " Внутренний отработал по цифре " + tempoints[i].Number);
-                foreach (var r in tempoints)
+                var newtemp = new List<Point>(tempoints.Count);
+                var newans = new List<int> (tempans);
+                newans.Add(tempoints[i].Number);
+                foreach(var item in tempoints)
                 {
-                    Console.WriteLine(r);
+                    var newP = new Point((int)item.Number, (List<int>)item.Connections);
+                    newtemp.Add(newP);
                 }
-                Console.WriteLine();
+                newtemp = DeleteVertex(newtemp, i);
+                //Console.WriteLine("Workin on " + tempoints[i].Number);
+                //foreach (var r in newtemp)
+                //{
+                //    Console.WriteLine(r);
+                //}
+                //Console.WriteLine();
+                ShuffleNested(newtemp, i, newans);
+                
             }
         }
         static void ShuffleStart(List<Point> points)
@@ -132,14 +143,26 @@ namespace Matvey
                 tempPoints = DeleteVertex(tempPoints, i);
                 
                 List<int> tempans = new List<int>() { points[i].Number };
-                //ShuffleNested(tempPoints, i, tempans);
-                int k = i + 1;
-                Console.WriteLine("Ответ по концу итерации с началом в " + k);
-                foreach(var r in tempPoints)
-                {
-                    Console.WriteLine(r);
-                }
-                Console.WriteLine();
+                
+                
+                //Console.WriteLine("New Start out " + points[i].Number);
+                //Console.WriteLine("Workin on " + points[i].Number);
+                //foreach (var r in tempPoints)
+                //{
+                //    Console.WriteLine(r);
+                //}
+                //Console.WriteLine();
+
+
+                ShuffleNested(tempPoints, i, tempans);
+
+                //int k = i + 1;
+                //Console.WriteLine("Ответ по концу итерации с началом в " + k);
+                //foreach(var r in tempPoints)
+                //{
+                //    Console.WriteLine(r);
+                //}
+                //Console.WriteLine();
             }
         }
         static void Main()
@@ -148,6 +171,11 @@ namespace Matvey
             points = Init1();
 
             ShuffleStart(points);
+            Console.WriteLine("Ans:");
+            foreach(int i in Ans)
+            {
+                Console.WriteLine(i);
+            }
         }
     }
 }
