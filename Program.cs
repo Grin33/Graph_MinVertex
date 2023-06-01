@@ -169,7 +169,11 @@ namespace Matvey
         {
             var points = new List<Point>();
             points = Init1();
-
+            foreach(var item in points)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine();
             ShuffleStart(points);
             Console.WriteLine("Ans:");
             foreach(int i in Ans)
