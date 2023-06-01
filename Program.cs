@@ -32,6 +32,19 @@ namespace Matvey
         static object locker = new object();
         static List<int> Ans = new List<int>();
 
+        static List<Point> Init2()
+        {
+            var toFill = new List<Point>
+            {
+                new Point (1,new List<int>{2,4 })
+                ,new Point (2,new List<int>{1,4})
+                ,new Point (3,new List<int>{4 })
+                ,new Point (4,new List<int>{1,2,3,5 })
+                ,new Point (5,new List<int>{4 })
+                ,new Point (6,new List<int>{ })
+            };
+            return toFill;
+        }
         static List<Point> Init1()
         {
             var toFill = new List<Point>
@@ -168,7 +181,7 @@ namespace Matvey
         static void Main()
         {
             var points = new List<Point>();
-            points = Init1();
+            points = Init2();
             foreach(var item in points)
             {
                 Console.WriteLine(item);
