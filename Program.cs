@@ -93,11 +93,6 @@ namespace Matvey
         }
         static void Check(List<Point> tempoints,List<int> tempans)
         {
-            var blah = new List<int>() { 2, 4, 5, 6 };
-            if (tempans.Equals(blah))
-            {
-                var serdtfghjimk = 0;
-            }
             bool ch = true;
             foreach(var p in tempoints)
             {
@@ -154,45 +149,119 @@ namespace Matvey
                     tempPoints.Add(newP);
                 }
                 tempPoints = DeleteVertex(tempPoints, i);
-                
                 List<int> tempans = new List<int>() { points[i].Number };
-                
-                
-                //Console.WriteLine("New Start out " + points[i].Number);
-                //Console.WriteLine("Workin on " + points[i].Number);
-                //foreach (var r in tempPoints)
-                //{
-                //    Console.WriteLine(r);
-                //}
-                //Console.WriteLine();
-
-
                 ShuffleNested(tempPoints, i, tempans);
-
-                //int k = i + 1;
-                //Console.WriteLine("Ответ по концу итерации с началом в " + k);
-                //foreach(var r in tempPoints)
-                //{
-                //    Console.WriteLine(r);
-                //}
-                //Console.WriteLine();
             }
+        }
+
+        static void ParalCheck(List<Point> tempoints, List<int> tempans,ref List<int> LocalThreadAns)
+        {
+            bool ch = true;
+            foreach(var p in tempoints)
+            {
+                if (p.Connections.Count != 0)
+                {
+                    ch = false;
+                }
+            }
+            if (ch)
+            {
+                if (LocalThreadAns.Count > tempans.Count)
+                {
+                    LocalThreadAns = new List<int>(tempans);
+                }
+                else if (LocalThreadAns.Count == 0)
+                {
+                    LocalThreadAns = new List<int>(tempans);
+                }
+            }
+        }
+        static void Parallel_Nested(List<Point> tempoints, int v, List<int> iterans,ref List<int> localThreadAns)
+        {
+            ParalCheck(tempoints, iterans,ref localThreadAns);
+            int n = v + 1;
+            for(int i = n; i < tempoints.Count; i++)
+            {
+                var newtemp = new List<Point>(tempoints.Count);
+                var newans = new List<int>(iterans);
+                newans.Add(tempoints[i].Number);
+                foreach (var item in tempoints)
+                {
+                    var newP = new Point((int)item.Number, (List<int>)item.Connections);
+                    newtemp.Add(newP);
+                }
+                newtemp = DeleteVertex(newtemp, i);
+                Parallel_Nested(newtemp, i, newans,ref localThreadAns);
+            }
+        }
+
+        static void Parallel_Shuffle(List<Point> points)
+        {
+            Parallel.For(0, points.Count, () => new List<int>(), (i, loop, localans) =>
+            {
+                var tempoints = new List<Point>(points.Count);
+                foreach (var item in points)
+                {
+                    var newP = new Point((int)item.Number, (List<int>)item.Connections);
+                    tempoints.Add(newP);
+                }
+                tempoints = DeleteVertex(tempoints, i);
+                var iterans = new List<int>() { points[i].Number };
+                Parallel_Nested(tempoints, i, iterans, ref localans);
+                return localans;
+            },
+            (x)=>
+            {
+                lock(locker)
+                {
+                    if ((Ans.Count > x.Count) && (x.Count != 0))
+                    {
+                        Ans = new List<int>(x);
+                    }
+                    else if((Ans.Count == 0) && (x.Count != 0))
+                    {
+                        Ans = new List<int>(x);
+                    }
+                    Console.WriteLine();
+                }
+            }
+            );
         }
         static void Main()
         {
             var points = new List<Point>();
-            points = Init2();
-            foreach(var item in points)
+            points = Init1();
+            var points1 = new List<Point>();
+            points1 = Init1();
+            foreach (var item in points)
             {
                 Console.WriteLine(item);
             }
-            Console.WriteLine();
+            Console.WriteLine("\n Straight Ans: ");
+            var sw = new Stopwatch();
+            sw.Start();
             ShuffleStart(points);
-            Console.WriteLine("Ans:");
             foreach(int i in Ans)
             {
                 Console.WriteLine(i);
             }
+            sw.Stop();
+            Console.WriteLine("Straight Time: "+sw.Elapsed.ToString());
+            
+            
+            Ans = new List<int>();
+            var sw1 = new Stopwatch();
+            sw1.Start();
+            Parallel_Shuffle(points);
+            Console.WriteLine("\n Parallel Ans:");
+            foreach (int i in Ans)
+            {
+                Console.WriteLine(i);
+            }
+            sw1.Stop();
+            Console.WriteLine("Parallel Time: " + sw1.Elapsed.ToString());
+            Console.WriteLine("Straight Time: " + sw.Elapsed.ToString());
+
         }
     }
 }
